@@ -6,7 +6,7 @@ Created on Sun Dec 16 20:14:03 2022
 """
 
 import matplotlib.pyplot as plt
-
+from torchviz import make_dot
 
 def loss_visualize(train_loss, validation_loss,img_name):
 
@@ -30,3 +30,12 @@ def loss_visualize(train_loss, validation_loss,img_name):
     plt.show()
 
     fig.savefig(img_name, dpi=1500)
+
+
+def model_structure_visualize(model):
+
+    #conda install python-graphviz
+    # pip install pip torchviz
+    sample = torch.zeros(1,96*96)
+    model = model.to("cpu")
+    make_dot(model(sample), params=dict(list(model.named_parameters())))
