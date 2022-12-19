@@ -26,7 +26,6 @@ class MicrostructureDataset(Dataset):
         
         dataset = h5py.File(path, 'r')
         
-
         self.images = dataset["x"]  # 100x96x96 
         
         self.optical_absorbtion = dataset["y"]  #100x1
@@ -61,12 +60,8 @@ if __name__ == "__main__":
     ratio = list(map(int,[0.7*len(dataset), 0.2*len(dataset), 0.1*len(dataset)]))
     train, test ,validation = random_split(dataset, ratio)
     
-    trainloader = DataLoader(dataset=train_dataset,batch_size=4, shuffle=True)
+    trainloader = DataLoader(dataset=dataset,batch_size=4, shuffle=True)
     
-    for ix, data in enumerate(trainloader):
-        print(ix)
-        
-        z = data
  
 
         

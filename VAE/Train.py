@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Dec 17 20:13:04 2022
+Created on Sat Dec 16 20:13:04 2022
 
 @author: talha.kilic
 """
 # Written Classes
 from dataset import MicrostructureDataset
-from Model import VAEModel
 
 #libraries
 from torch.utils.data import DataLoader
@@ -14,9 +13,6 @@ from torch.utils.data import Dataset, DataLoader, random_split
 
 import torch
 import time
-import math
-import numpy as np
-import torch.optim as optim
 
 class ModelTrain:
 
@@ -85,17 +81,30 @@ class ModelTrain:
         with torch.no_grad():
             for idx, img in enumerate(self.test_loader):
                 
-                # if self.use_gpu:
-                    #     img = img.cuda()
+               
+                
+                if self.use_gpu:
+                    img = img.cuda()
+                    
+                #x = x. flatten operatıon
+                img = torch.flatten(img, start_dim=1)   
+                img = img.to(torch.float16)
+                with torch.cuda.amp.autocast():
 
-                y_pred = self.model(img)
+                    y_pred, mu, log_var = self.model(img)
             
-                #Validation Loss calculation part
-                loss = self.criteria(y_pred, img)
+                    #Validation Loss calculation part
+                    loss = self.criteria(y_pred, img)
                 
                 #On each batch it sum up.
                 test_loss += loss.item()* img.size(0)
-
+        
+        #Epoch losses and accuracy
+        test_loss = test_loss / (len(self.test_loader.sampler))
+        
+        print("test_loss= "+ str(test_loss))
+        
+        
     def train(self,model_,criteria_,n_epoch_,optimizer_):
         
         
@@ -120,6 +129,8 @@ class ModelTrain:
 
         for epoch in range(self.epoch):
             
+            print(f" ********** { {epoch} } EPOCH")
+            
             # make it 0 in each epoch
             train_loss = 0.0
             valid_loss = 0.0
@@ -129,17 +140,22 @@ class ModelTrain:
              #start train gradient calculation active
             self.model.train()
 
-            for idx, img in enumerate(self.loader):
-                 
+            for idx, img in enumerate(self.train_loader):
+                
                 img = img.to(device)
+                
+                #x = x. flatten operatıon
+                img = torch.flatten(img, start_dim=1)   
+                img = img.to(torch.float16)
                  
                 #gradient refresh, makes the general faster
                 for param in self.model.parameters():
                     param.grad = None
                      
                 with torch.cuda.amp.autocast():
-                    y_pred = self.model(img)
                     
+                    y_pred, mu, log_var = self.model(img)
+                    # 
                     # output is float16 because linear layers autocast to float16.
                     assert y_pred.dtype is torch.float16
                     
@@ -155,5 +171,58 @@ class ModelTrain:
                 #On each batch it sum up.
                 train_loss += loss.item()* img.size(0)
                     
-                                
+                self.loss_values['train_every_iteration'].append(loss.item()* img.size(0))
+            
+            #Epoch losses and accuracy
+            train_loss = train_loss / len(self.train_loader.sampler)
+            self.loss_values['train_every_epoch'].append(train_loss)
+            
+            if epoch % 3 == 0:
+                
+                #start evaluation gradient calculation passive
+                self.model.eval()
+
+                # doesn't #turn off Dropout and BatchNorm.                 
+                with torch.no_grad():
+                    
+                    # Measure the performance in validation set.
+                    for idx2, img2 in enumerate(self.validation_loader):
+                        
+                        img2 = img2.cuda()
+                        #x = x. flatten operatıon
+                        img2 = torch.flatten(img2, start_dim=1)   
+                        img2 = img2.to(torch.float16)
+                        with torch.cuda.amp.autocast():
+
+                            y_pred, mu, log_var = self.model(img2)
+
+                            loss = self.criteria(y_pred, img2)
+                        
+                        #On each batch it sum up.
+                        valid_loss += loss.item()* img2.size(0)
+                        
+                        self.loss_values['validation_every_iteration'].append(loss.item()* img2.size(0))
+
+                #Epoch losses and accuracy
+                valid_loss = valid_loss / (len(self.validation_loader.sampler))
+                self.loss_values['validation_every_epoch'].append(valid_loss)
+            
+
+        end = time.time()
+        
+        print('Total Elapsed time is %f seconds.' % (end - start))
+        
+        #Test Result
+        self.test()
+
+        return self.loss_values,self.model
+
+                        
+
+                    
+                    
+                    
+
+
+
                         
