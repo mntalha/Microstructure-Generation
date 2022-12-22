@@ -16,7 +16,7 @@ import h5py
 # Macros
 
 # Paths
-root_dir = "C:/Users/talha/Desktop/Microstructure-Generation/data/dataset_z9.hdf5" 
+root_dir = "C:/Users/talha/Desktop/Microstructure-Generation/dataset/dataset_z9.hdf5" 
 
 
 class MicrostructureDataset(Dataset):

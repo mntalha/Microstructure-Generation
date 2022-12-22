@@ -7,6 +7,7 @@ Created on Sun Dec 16 20:14:03 2022
 
 import matplotlib.pyplot as plt
 from torchviz import make_dot
+import torch
 
 def loss_visualize(train_loss, validation_loss,img_name):
 
