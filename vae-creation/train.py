@@ -33,6 +33,7 @@ class ModelTrain:
        }
     
     
+    
     use_gpu = None
     model = None
     criteria = None
@@ -42,7 +43,8 @@ class ModelTrain:
     dataset = None
     loader = None
     mydataset = None
-    
+    latent_sample = None
+
     def __init__(self):
         pass
     
@@ -91,7 +93,7 @@ class ModelTrain:
                 img = img.to(torch.float16)
                 with torch.cuda.amp.autocast():
 
-                    y_pred, mu, log_var = self.model(img)
+                    y_pred, mu, log_var, latent_sample = self.model(img)
             
                     #Validation Loss calculation part
                     loss = self.criteria(y_pred, img)
@@ -154,7 +156,7 @@ class ModelTrain:
                      
                 with torch.cuda.amp.autocast():
                     
-                    y_pred, mu, log_var = self.model(img)
+                    y_pred, mu, log_var, latent_sample = self.model(img)
                     # 
                     # output is float16 because linear layers autocast to float16.
                     assert y_pred.dtype is torch.float16
@@ -194,7 +196,7 @@ class ModelTrain:
                         img2 = img2.to(torch.float16)
                         with torch.cuda.amp.autocast():
 
-                            y_pred, mu, log_var = self.model(img2)
+                            y_pred, mu, log_var,_ = self.model(img2)
 
                             loss = self.criteria(y_pred, img2)
                         
@@ -215,7 +217,7 @@ class ModelTrain:
         #Test Result
         self.test()
 
-        return self.loss_values,self.model
+        return self.loss_values,self.model, latent_sample
 
                         
 

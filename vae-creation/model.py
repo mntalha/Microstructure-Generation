@@ -79,7 +79,7 @@ class VAEModel(nn.Module):
             x = torch.sigmoid(self.dec2(x))
             reconstruction = self.batch4(x)
 
-            return reconstruction, mu, log_var
+            return reconstruction, mu, log_var, z
 
 
 if __name__ == "__main__":
