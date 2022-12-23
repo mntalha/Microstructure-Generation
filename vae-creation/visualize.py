@@ -75,5 +75,5 @@ def visualize_microstructure(img_arr):
     plt.figure(0)
     val = filters.threshold_otsu(img)
     plt.imshow(img>val, cmap='gray')
-    # plt.savefig('example.jpg')
+    plt.savefig('../figures/microstructure_example.jpg')
     print ("====> image generated!")

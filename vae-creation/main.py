@@ -26,8 +26,8 @@ def main():
     train_obj.dataset_load("../dataset/dataset_z9.hdf5")
     
     model = VAEModel()
-    learning_rate = 3e-3
-    n_epochs =  5
+    learning_rate = 3e-4
+    n_epochs =  1000
     weight_decay =3e-6 
     optimizer = optim.Adam(params=model.parameters(), lr=learning_rate,weight_decay=weight_decay)
     criteria = nn.MSELoss()
@@ -39,17 +39,38 @@ def main():
 if __name__ == "__main__":
     
     loss, model, latent_sample = main()
-    save_pytorch_model(model, model_name="test", saved_path="../saved_model")
     
-    tt = load_pytorch_model(VAEModel, "../saved_model/test")
+    decision = [1,2,3,4,5,7] # user decision,added which one it is demand.
     
-    # Be careful with all tensors to be on the same device
-    decoder = subtract_decoder(tt)
+    if 1 in decision: # 1- Save the model into the defined path
+        print("PART 1...............")
+        save_pytorch_model(model, model_name="test", saved_path="../saved_model")
     
-    img_arr = decoder.cuda()(latent_sample)
+    if 2 in decision: # 2- Load the model 
+        print("PART 2...............")
+        saved_model = load_pytorch_model(VAEModel, "../saved_model/test")
     
-    visualize_microstructure(img_arr)
-    # img_name = "C:/Users/talha/Desktop/Microstructure-Generation/figures/loss_visualize_3.png"
-    # loss_visualize(loss["train_every_epoch"], loss["validation_every_epoch"],img_name)
-    # model_structure_visualize(model)
+    if 3 in decision: # 3- Subtract decoder part from saved or normal model 
+        print("PART 3...............")
+        #Be careful with all tensors to be on the same device
+        # decoder.cuda() or decoder.cpu()
+        decoder = subtract_decoder(saved_model).cuda()
+        
+    if 4 in decision: #  4- Generate microstructure image from subtracted part
+        print("PART 4...............")
+        img_arr = decoder(latent_sample)
+    
+    if 5 in decision: # 5- plot the generated image
+        print("PART 5...............")
+        visualize_microstructure(img_arr)
+    
+    if 6 in decision: # 6- Model structure visualize
+        print("PART 6...............")
+        visualize_model_structure(model)
+
+    if 7 in decision: # 7- Loss plot and saved 
+        print("PART 7...............")
+        img_name = "../figures/loss_visualize.png"
+        visualize_loss(loss["train_every_epoch"], loss["validation_every_epoch"],img_name)
+
 
