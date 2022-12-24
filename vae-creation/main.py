@@ -15,7 +15,7 @@ from visualize import visualize_microstructure
 #Libraries
 import torch.nn as nn
 import torch.optim as optim
-
+import torch
 
 def main():
     
@@ -58,6 +58,8 @@ if __name__ == "__main__":
         
     if 4 in decision: #  4- Generate microstructure image from subtracted part
         print("PART 4...............")
+        # latent_variable = torch.tensor([-0.4563,  0.22215,  0.5634427,  0.27211975,  0.12787307,
+        #        -0.26973462,  0.74367849,  0.455908,  0.78126333]).reshape(1,9).cuda()
         img_arr = decoder(latent_sample)
     
     if 5 in decision: # 5- plot the generated image
