@@ -89,7 +89,7 @@ class ModelTrain:
                     img = img.cuda()
                     
                 #x = x. flatten operatıon
-                img = torch.flatten(img, start_dim=1)   
+                # img = torch.flatten(img, start_dim=1)   
                 img = img.to(torch.float16)
                 with torch.cuda.amp.autocast():
 
@@ -147,7 +147,7 @@ class ModelTrain:
                 img = img.to(device)
                 
                 #x = x. flatten operatıon
-                img = torch.flatten(img, start_dim=1)   
+                # img = torch.flatten(img, start_dim=1)   
                 img = img.to(torch.float16)
                  
                 #gradient refresh, makes the general faster
@@ -156,13 +156,15 @@ class ModelTrain:
                      
                 with torch.cuda.amp.autocast():
                     
-                    y_pred, mu, log_var, latent_sample = self.model(img)
+                    y_pred, mean, log_var, latent_sample = self.model(img)
                     # 
                     # output is float16 because linear layers autocast to float16.
                     assert y_pred.dtype is torch.float16
                     
                     #Training Loss calculation part
                     loss = self.criteria(y_pred, img)
+                    
+                    # loss +=  self.model.gaussian_loss_fnc(log_var,mean)
                     
                     # loss is float32 because mse_loss layers autocast to float32.
                     assert loss.dtype is torch.float32
@@ -192,7 +194,7 @@ class ModelTrain:
                         
                         img2 = img2.cuda()
                         #x = x. flatten operatıon
-                        img2 = torch.flatten(img2, start_dim=1)   
+                        # img2 = torch.flatten(img2, start_dim=1)   
                         img2 = img2.to(torch.float16)
                         with torch.cuda.amp.autocast():
 

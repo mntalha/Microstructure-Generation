@@ -41,16 +41,22 @@ class VAEModel(nn.Module):
             self.batch4=nn.BatchNorm1d(images_size) 
 
 
-        def reparameterize(self, mu, log_var):
+        def reparameterize(self, mean, log_var):
             
-            std = torch.exp(0.5*log_var) 
-            eps = torch.randn_like(std) 
-            sample = mu + (eps * std)
+            epsilon = torch.randn_like(mean) 
             
-            return sample
+            # z = mean + e*var
+            return epsilon * torch.exp(log_var* 0.5) + mean 
+        
+        
+        def gaussian_loss_fnc(self,log_var,mean):
+            
+            return (log_var**2 + mean**2 - torch.log(log_var) - 1/2).sum()
+
             
         def forward(self, x):
 
+            x = torch.flatten(x, start_dim=1)   
             # encoding
             x = F.relu(self.enc1(x))
             x = self.batch1(x)
@@ -61,12 +67,12 @@ class VAEModel(nn.Module):
             x = self.dropout2(x)
             x = x.view(-1, 2, features)
             
-            # get `mu` and `log_var`
-            mu = x[:, 0, :] # the first feature values as mean
-            log_var = x[:, 1, :] # the other feature values as variance
+           
+            mean = x[:, 0, :] # as  mean
+            log_var = x[:, 1, :] #  as variance
 
             # get the latent vector through reparameterization
-            z = self.reparameterize(mu, log_var)
+            z = self.reparameterize(mean, log_var)
             
             
             # decoding
@@ -77,9 +83,10 @@ class VAEModel(nn.Module):
             
             
             x = torch.sigmoid(self.dec2(x))
-            reconstruction = self.batch4(x)
+            x = self.batch4(x)
+            x = x.view(-1, 96, 96)
 
-            return reconstruction, mu, log_var, z
+            return x, mean, log_var, z
 
 
 if __name__ == "__main__":

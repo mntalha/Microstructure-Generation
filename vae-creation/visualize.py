@@ -15,7 +15,7 @@ def visualize_loss(train_loss, validation_loss,img_name):
 
     fig, ax1 = plt.subplots(figsize=(10, 6), dpi=500)
 
-    plt.title('Loss Graph of VAE Model')
+    plt.title('Loss Graph of VAE Model (Batch + Dropout + KL Divergence)')
 
     color = 'tab:purple'
     plt.plot(train_loss, color=color)
@@ -29,7 +29,7 @@ def visualize_loss(train_loss, validation_loss,img_name):
     plt.xlabel("Epoch")
     plt.ylabel("Loss Value")
 
-    plt.legend(class_names, loc=4)
+    plt.legend(class_names, loc=1)
     plt.show()
 
     fig.savefig(img_name, dpi=1500)

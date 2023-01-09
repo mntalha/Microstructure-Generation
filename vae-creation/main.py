@@ -40,7 +40,7 @@ if __name__ == "__main__":
     
     loss, model, latent_sample = main()
     
-    decision = [1,2,3,4,5,7] # user decision,added which one it is demand.
+    decision = [7] # user decision,added which one it is demand.
     
     if 1 in decision: # 1- Save the model into the defined path
         print("PART 1...............")
