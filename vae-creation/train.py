@@ -83,8 +83,6 @@ class ModelTrain:
         with torch.no_grad():
             for idx, img in enumerate(self.test_loader):
                 
-               
-                
                 if self.use_gpu:
                     img = img.cuda()
                     
@@ -96,6 +94,7 @@ class ModelTrain:
                     y_pred, mu, log_var, latent_sample = self.model(img)
             
                     #Validation Loss calculation part
+                    # loss = self.model.calculate_loss(img,y_pred,latent_sample,mu,log_var)
                     loss = self.criteria(y_pred, img)
                 
                 #On each batch it sum up.
@@ -156,12 +155,13 @@ class ModelTrain:
                      
                 with torch.cuda.amp.autocast():
                     
-                    y_pred, mean, log_var, latent_sample = self.model(img)
+                    y_pred, mean, log_var, latent_sample = self.model(img.to(device))
                     # 
                     # output is float16 because linear layers autocast to float16.
                     assert y_pred.dtype is torch.float16
                     
                     #Training Loss calculation part
+                    # loss = self.model.calculate_loss(img,y_pred,latent_sample,mean,log_var)
                     loss = self.criteria(y_pred, img)
                     
                     # loss +=  self.model.gaussian_loss_fnc(log_var,mean)
@@ -196,9 +196,12 @@ class ModelTrain:
                         #x = x. flatten operatıon
                         # img2 = torch.flatten(img2, start_dim=1)   
                         img2 = img2.to(torch.float16)
+                        
                         with torch.cuda.amp.autocast():
 
-                            y_pred, mu, log_var,_ = self.model(img2)
+                            y_pred, mu, log_var,latent_sample = self.model(img2)
+
+                            # loss = self.model.calculate_loss(img2,y_pred,latent_sample,mu,log_var)
 
                             loss = self.criteria(y_pred, img2)
                         

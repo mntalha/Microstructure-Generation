@@ -19,7 +19,7 @@ import torch
 
 def main():
     
-    
+    torch.manual_seed(42)
     train_obj = ModelTrain()
     train_obj.GPU_Usage(True)
     print(train_obj.use_gpu)
@@ -73,6 +73,8 @@ if __name__ == "__main__":
     if 7 in decision: # 7- Loss plot and saved 
         print("PART 7...............")
         img_name = "../figures/loss_visualize.png"
-        visualize_loss(loss["train_every_epoch"], loss["validation_every_epoch"],img_name)
+        # title = "Loss Graph of VAE Model (Batch + Dropout + KL Divergence)"
+        title = "Loss Graph of VAE Model (CNN + Dense Layer)"
+        visualize_loss(loss["train_every_epoch"], loss["validation_every_epoch"],title, img_name)
 
 

@@ -11,11 +11,12 @@ import torch
 from torchvision import transforms
 from skimage import filters
 
-def visualize_loss(train_loss, validation_loss,img_name):
+def visualize_loss(train_loss, validation_loss,title,img_name):
 
     fig, ax1 = plt.subplots(figsize=(10, 6), dpi=500)
 
-    plt.title('Loss Graph of VAE Model (Batch + Dropout + KL Divergence)')
+    plt.title(title)
+    # plt.title('Loss Graph of VAE Model (Batch + Dropout + KL Divergence)')
 
     color = 'tab:purple'
     plt.plot(train_loss, color=color)
@@ -32,7 +33,7 @@ def visualize_loss(train_loss, validation_loss,img_name):
     plt.legend(class_names, loc=1)
     plt.show()
 
-    fig.savefig(img_name, dpi=1500)
+    fig.savefig(img_name, dpi=500)
 
 
 def visualize_model_structure(model):
