@@ -91,14 +91,19 @@ class VAEModel(nn.Module):
             
             
             # decoder 
-            self.dec1 = nn.Linear(in_features=features, out_features=128)
+            
+            
+           
+            self.dec1 = nn.ConvTranspose2d(in_channels=1,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
             self.dec.append(self.dec1)
-            self.dec2 = nn.Linear(in_features=128, out_features=256)
+            self.dec2 = nn.ConvTranspose2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
             self.dec.append(self.dec2)
-            self.dec3 = nn.Linear(in_features=256, out_features=512)
+            self.dec3 = nn.ConvTranspose2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
             self.dec.append(self.dec3)
-            self.dec4 = nn.Linear(in_features=512, out_features=images_size*images_size)
+            self.dec4 =  nn.ConvTranspose2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
             self.dec.append(self.dec4)
+            self.dec5= nn.Linear(in_features=50*9*17, out_features=images_size*images_size)
+            self.dec.append(self.dec5)
 
             self.dec_drop1 = nn.Dropout2d(1-dropout_keep_rate)
             self.dec_drop.append(self.dec_drop1)
@@ -109,13 +114,13 @@ class VAEModel(nn.Module):
             self.dec_drop4 = nn.Dropout2d(1-dropout_keep_rate)
             self.dec_drop.append(self.dec_drop4)
             
-            self.dec_batch1 =nn.BatchNorm1d(128) 
+            self.dec_batch1 =nn.BatchNorm2d(channel_size) 
             self.dec_batch.append(self.dec_batch1)
-            self.dec_batch2 =nn.BatchNorm1d(256) 
+            self.dec_batch2 =nn.BatchNorm2d(channel_size) 
             self.dec_batch.append(self.dec_batch2)
-            self.dec_batch3 =nn.BatchNorm1d(512) 
+            self.dec_batch3 =nn.BatchNorm2d(channel_size) 
             self.dec_batch.append(self.dec_batch3)
-            self.dec_batch4 = nn.BatchNorm1d(images_size*images_size) 
+            self.dec_batch4 = nn.BatchNorm2d(channel_size) 
             self.dec_batch.append(self.dec_batch4)
             
             
@@ -201,7 +206,7 @@ class VAEModel(nn.Module):
             
             
             #Decoder
-            x = z
+            x = z.reshape(-1,1,1,features)
             
             for i in range(4):
                 #cnv
@@ -219,6 +224,8 @@ class VAEModel(nn.Module):
                
                 #dropout
                 if i == 3: #Last Layer 
+                    x = torch.flatten(x, start_dim=1) 
+                    x = self.dec[4](x)
                     out =  x.reshape(-1,images_size,images_size)
                 # else:
                 #     x = self.dec_drop[i](x)
@@ -232,3 +239,7 @@ class VAEModel(nn.Module):
 if __name__ == "__main__":
     model = VAEModel()
     print(model.parameters)
+    
+    
+    
+    

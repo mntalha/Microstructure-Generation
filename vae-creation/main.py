@@ -74,7 +74,7 @@ if __name__ == "__main__":
         print("PART 7...............")
         img_name = "../figures/loss_visualize.png"
         # title = "Loss Graph of VAE Model (Batch + Dropout + KL Divergence)"
-        title = "Loss Graph of VAE Model (CNN + Dense Layer)"
+        title = "Loss Graph of VAE Model (CNN + CNN)"
         visualize_loss(loss["train_every_epoch"], loss["validation_every_epoch"],title, img_name)
 
 
