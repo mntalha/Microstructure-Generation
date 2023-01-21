@@ -35,13 +35,13 @@ class VAEModel(nn.Module):
         def __init__(self):
             super(VAEModel, self).__init__()
             
-            self.conv1 = nn.Conv2d(in_channels=1,out_channels=channel_size,kernel_size=3,stride=1,padding="same",bias=True)
+            self.conv1 = nn.Linear(in_features=images_size*images_size, out_features=128*32)
             self.conv.append(self.conv1)
-            self.conv2 = nn.Conv2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,padding="same",bias=True)
+            self.conv2 = nn.Linear(in_features=128*32, out_features=128*8)
             self.conv.append(self.conv2)
-            self.conv3 = nn.Conv2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,padding="same",bias=True)
+            self.conv3 =nn.Linear(in_features=128*8, out_features=128*4)
             self.conv.append(self.conv3)        
-            self.conv4 = nn.Conv2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,padding="same",bias=True)
+            self.conv4 = nn.Linear(in_features=128*4, out_features=128*2)
             self.conv.append(self.conv4)
             
             
@@ -55,55 +55,43 @@ class VAEModel(nn.Module):
             self.dropout.append(self.dropout4)
             
             
-            self.batch1=nn.BatchNorm2d(channel_size) 
+            self.batch1=nn.BatchNorm1d(128*32) 
             self.batch.append(self.batch1)        
-            self.batch2=nn.BatchNorm2d(channel_size)
+            self.batch2=nn.BatchNorm1d(128*8)
             self.batch.append(self.batch2)
-            self.batch3=nn.BatchNorm2d(channel_size)
+            self.batch3=nn.BatchNorm1d(128*4)
             self.batch.append(self.batch3)            
-            self.batch4=nn.BatchNorm2d(channel_size)
+            self.batch4=nn.BatchNorm1d(128*2)
             self.batch.append(self.batch4)
             
             
-            self.maxpooling1= nn.MaxPool2d(2)
-            self.maxpooling.append(self.maxpooling1)
-            self.maxpooling2= nn.MaxPool2d(2)
-            self.maxpooling.append(self.maxpooling2)
-            self.maxpooling3= nn.MaxPool2d(2)
-            self.maxpooling.append(self.maxpooling3)
-            self.maxpooling4= nn.MaxPool2d(2)
-            self.maxpooling.append(self.maxpooling4)
+            # self.maxpooling1= nn.MaxPool2d(2)
+            # self.maxpooling.append(self.maxpooling1)
+            # self.maxpooling2= nn.MaxPool2d(2)
+            # self.maxpooling.append(self.maxpooling2)
+            # self.maxpooling3= nn.MaxPool2d(2)
+            # self.maxpooling.append(self.maxpooling3)
+            # self.maxpooling4= nn.MaxPool2d(2)
+            # self.maxpooling.append(self.maxpooling4)
             
 
             
             #Before Latent Space
-            # self.enc_lt1 = nn.Linear(in_features=self.after_cnv_size, out_features=512)
-            # self.enc_lt.append(self.enc_lt1)
-            # self.enc_lt2 = nn.Linear(in_features=512, out_features=256)
-            # self.enc_lt.append(self.enc_lt2)           
-            # self.enc_lt3 = nn.Linear(in_features=256, out_features=128)
-            # self.enc_lt.append(self.enc_lt3)            
-            # self.enc_lt4 = nn.Linear(in_features=128, out_features=features*2)
-            # self.enc_lt.append(self.enc_lt4)
-            self.enc_lt1 = nn.Linear(in_features=self.after_cnv_size, out_features=features*2)
+            self.enc_lt1 = nn.Linear(in_features=128*2, out_features=features*2)
             self.enc_lt.append(self.enc_lt1)
             self.enc_batch1 =nn.BatchNorm1d(features*2) 
             
             
             # decoder 
-            
-            
-           
-            self.dec1 = nn.ConvTranspose2d(in_channels=1,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
+            self.dec1 = nn.Linear(in_features=features, out_features=128)
             self.dec.append(self.dec1)
-            self.dec2 = nn.ConvTranspose2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
+            self.dec2 = nn.Linear(in_features=128, out_features=256)
             self.dec.append(self.dec2)
-            self.dec3 = nn.ConvTranspose2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
+            self.dec3 = nn.Linear(in_features=256, out_features=512)
             self.dec.append(self.dec3)
-            self.dec4 =  nn.ConvTranspose2d(in_channels=channel_size,out_channels=channel_size,kernel_size=3,stride=1,bias=True)
-            self.dec.append(self.dec4)
-            self.dec5= nn.Linear(in_features=50*9*17, out_features=images_size*images_size)
-            self.dec.append(self.dec5)
+            self.dec4 = nn.Linear(in_features=512, out_features=images_size*images_size)
+            self.dec.append(self.dec4) 
+            
 
             self.dec_drop1 = nn.Dropout2d(1-dropout_keep_rate)
             self.dec_drop.append(self.dec_drop1)
@@ -114,14 +102,15 @@ class VAEModel(nn.Module):
             self.dec_drop4 = nn.Dropout2d(1-dropout_keep_rate)
             self.dec_drop.append(self.dec_drop4)
             
-            self.dec_batch1 =nn.BatchNorm2d(channel_size) 
+            self.dec_batch1 =nn.BatchNorm1d(128) 
             self.dec_batch.append(self.dec_batch1)
-            self.dec_batch2 =nn.BatchNorm2d(channel_size) 
+            self.dec_batch2 =nn.BatchNorm1d(256) 
             self.dec_batch.append(self.dec_batch2)
-            self.dec_batch3 =nn.BatchNorm2d(channel_size) 
+            self.dec_batch3 =nn.BatchNorm1d(512) 
             self.dec_batch.append(self.dec_batch3)
-            self.dec_batch4 = nn.BatchNorm2d(channel_size) 
+            self.dec_batch4 = nn.BatchNorm1d(images_size*images_size) 
             self.dec_batch.append(self.dec_batch4)
+            
             
             
 
@@ -157,9 +146,9 @@ class VAEModel(nn.Module):
             
         def forward(self, x):
 
-            # x = torch.flatten(x, start_dim=1)   
+            x = torch.flatten(x, start_dim=1)   
             
-            x = x.reshape(-1,1,images_size,images_size)
+            # x = x.reshape(-1,1,images_size,images_size)
             #Encoder Netwrok
             for i in range(4):
                 #cnv
@@ -175,7 +164,7 @@ class VAEModel(nn.Module):
                 #print(f"{i}**",x.shape)
                 
                  #pooling
-                x = self.maxpooling[i](x)
+                # x = self.maxpooling[i](x)
                 #print(f"{i}**",x.shape)
                 
                
@@ -206,7 +195,8 @@ class VAEModel(nn.Module):
             
             
             #Decoder
-            x = z.reshape(-1,1,1,features)
+            # x = z.reshape(-1,1,1,features)
+            x = z
             
             for i in range(4):
                 #cnv
@@ -224,8 +214,8 @@ class VAEModel(nn.Module):
                
                 #dropout
                 if i == 3: #Last Layer 
-                    x = torch.flatten(x, start_dim=1) 
-                    x = self.dec[4](x)
+                    # x = torch.flatten(x, start_dim=1) 
+                    # x = self.dec[4](x)
                     out =  x.reshape(-1,images_size,images_size)
                 # else:
                 #     x = self.dec_drop[i](x)
