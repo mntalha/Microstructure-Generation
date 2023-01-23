@@ -27,12 +27,14 @@ def main():
     
     model = VAEModel()
     learning_rate = 3e-4
-    n_epochs =  1000
+    n_epochs =  500
     weight_decay =3e-6 
     optimizer = optim.Adam(params=model.parameters(), lr=learning_rate,weight_decay=weight_decay)
     criteria = nn.MSELoss()
 
     loss_values, model, latent_sample=train_obj.train(model, criteria, n_epochs, optimizer)
+    
+    train_obj.test__()
     
     return loss_values,model, latent_sample
 

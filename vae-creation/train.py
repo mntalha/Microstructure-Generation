@@ -69,7 +69,40 @@ class ModelTrain:
         
         self.use_gpu=use
         
-    def test(self):
+    
+    def test__(self):
+        
+        #TEST
+        print("---------------------TEST PROCESS WITHOUT KL------------------------------")
+        #Test Values
+        test_loss = 0.0
+        test_acc = 0.0
+
+        #Model in Evaluatıon mode, no changes in models parameters        
+        self.model.eval()
+        
+        with torch.no_grad():
+            for idx, img in enumerate(self.test_loader):
+                
+                img = img.cuda()
+                img =  img.to(torch.float32)
+
+                y_pred, mean, log_var, latent_sample = self.model(img)
+            
+                loss = self.criteria(y_pred, img)
+                
+
+
+                
+                #On each batch it sum up.
+                test_loss += loss.item()* img.size(0)
+        
+        #Epoch losses and accuracy
+        test_loss = test_loss / (len(self.test_loader.sampler))
+        
+        print("test_loss= "+ str(test_loss))
+        
+    def test(self,device):
         
         #TEST
         print("---------------------TEST PROCESS------------------------------")
@@ -83,19 +116,17 @@ class ModelTrain:
         with torch.no_grad():
             for idx, img in enumerate(self.test_loader):
                 
-                if self.use_gpu:
-                    img = img.cuda()
-                    
-                #x = x. flatten operatıon
-                # img = torch.flatten(img, start_dim=1)   
-                img = img.to(torch.float16)
-                with torch.cuda.amp.autocast():
+                img = img.to(device)
+                img =  img.to(torch.float32)
 
-                    y_pred, mu, log_var, latent_sample = self.model(img)
+                y_pred, mean, log_var, latent_sample = self.model(img)
             
-                    #Validation Loss calculation part
-                    # loss = self.model.calculate_loss(img,y_pred,latent_sample,mu,log_var)
-                    loss = self.criteria(y_pred, img)
+                loss = self.criteria(y_pred, img)
+                
+                kl_loss = self.model.kl_loss(latent_sample,mean,log_var)
+                
+                loss += kl_loss
+
                 
                 #On each batch it sum up.
                 test_loss += loss.item()* img.size(0)
@@ -143,32 +174,25 @@ class ModelTrain:
 
             for idx, img in enumerate(self.train_loader):
                 
-                img = img.to(device)
                 
-                #x = x. flatten operatıon
-                # img = torch.flatten(img, start_dim=1)   
-                img = img.to(torch.float16)
-                 
+                img = img.to(device)
+                img =  img.to(torch.float32)
+
+ 
                 #gradient refresh, makes the general faster
                 for param in self.model.parameters():
                     param.grad = None
                      
-                with torch.cuda.amp.autocast():
                     
-                    y_pred, mean, log_var, latent_sample = self.model(img.to(device))
-                    # 
-                    # output is float16 because linear layers autocast to float16.
-                    assert y_pred.dtype is torch.float16
+                y_pred, mean, log_var, latent_sample = self.model(img)
+
+                loss = self.criteria(y_pred, img)
+                
+                kl_loss = self.model.kl_loss(latent_sample,mean,log_var)
+                
+                loss += kl_loss
                     
-                    #Training Loss calculation part
-                    # loss = self.model.calculate_loss(img,y_pred,latent_sample,mean,log_var)
-                    loss = self.criteria(y_pred, img)
-                    
-                    # loss +=  self.model.gaussian_loss_fnc(log_var,mean)
-                    
-                    # loss is float32 because mse_loss layers autocast to float32.
-                    assert loss.dtype is torch.float32
-                    loss.backward()
+                loss.backward()
                     
                 self.optimizer.step()
 
@@ -192,19 +216,20 @@ class ModelTrain:
                     # Measure the performance in validation set.
                     for idx2, img2 in enumerate(self.validation_loader):
                         
-                        img2 = img2.cuda()
+                        img2 = img2.to(device)
                         #x = x. flatten operatıon
                         # img2 = torch.flatten(img2, start_dim=1)   
-                        img2 = img2.to(torch.float16)
+                        img2 = img2.to(torch.float32)
                         
-                        with torch.cuda.amp.autocast():
 
-                            y_pred, mu, log_var,latent_sample = self.model(img2)
+                        y_pred, mu, log_var,latent_sample = self.model(img2)
 
-                            # loss = self.model.calculate_loss(img2,y_pred,latent_sample,mu,log_var)
-
-                            loss = self.criteria(y_pred, img2)
+                        loss = self.criteria(y_pred, img2)
                         
+                        kl_loss = self.model.kl_loss(latent_sample,mu,log_var)
+                        
+                        loss += kl_loss
+
                         #On each batch it sum up.
                         valid_loss += loss.item()* img2.size(0)
                         
@@ -220,7 +245,7 @@ class ModelTrain:
         print('Total Elapsed time is %f seconds.' % (end - start))
         
         #Test Result
-        self.test()
+        self.test(device)
 
         return self.loss_values,self.model, latent_sample
 

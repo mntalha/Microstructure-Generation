@@ -22,7 +22,7 @@ def visualize_loss(train_loss, validation_loss,title,img_name):
     plt.plot(train_loss, color=color)
 
     color = 'tab:blue'
-    x_axis = list(range(0, 1000, 3))
+    x_axis = list(range(0, 500, 3))
     plt.plot(x_axis, validation_loss, color=color)
 
     class_names = ["Train", "Validation"]
