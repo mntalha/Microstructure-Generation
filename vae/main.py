@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     if 7 in decision: # 7- Loss plot and saved 
         print("PART 7...............")
-        img_name = "../figures/loss_visualize.png"
+        img_name = "../outputs/loss_visualize.png"
         # title = "Loss Graph of VAE Model (Batch + Dropout + KL Divergence)"
         # title = "Loss Graph of VAE Model (Dense Layer + Dense Layer (Added Batch + Dropout))"
         title = "---"

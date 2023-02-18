@@ -91,9 +91,6 @@ class ModelTrain:
             
                 loss = self.criteria(y_pred, img)
                 
-
-
-                
                 #On each batch it sum up.
                 test_loss += loss.item()* img.size(0)
         
